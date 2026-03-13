@@ -11,7 +11,10 @@ public class SubWorldManager {
 
     private static final Map<String, SubWorld> WORLDS = new HashMap<>();
 
-    public static void createWorld(MinecraftServer server, String name) {
+    public static boolean createWorld(MinecraftServer server, String name) {
+        if (worldExists(name)) {
+            return false;
+        }
         SubWorld world = new SubWorld(name, WorldType.FULL);
         WORLDS.put(name, world);
 
@@ -19,9 +22,11 @@ public class SubWorldManager {
 
         DimensionsManager.getWorld(server, world.getMainWorldKey());
 
+        return true;
     }
 
     public static void loadWorlds(MinecraftServer server) {
+        WORLDS.clear();
         for (SubWorldStorage.StoredSubWorld stored : SubWorldStorage.load(server)) {
             SubWorld world = new SubWorld(
                     stored.name(),

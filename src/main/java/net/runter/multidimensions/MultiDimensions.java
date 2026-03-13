@@ -18,9 +18,7 @@ public class MultiDimensions implements ModInitializer {
 
 		MultiDimensionsCommands.register();
 
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			SubWorldManager.loadWorlds(server);
-		});
+		ServerLifecycleEvents.SERVER_STARTED.register(SubWorldManager::loadWorlds);
 
 	}
 }

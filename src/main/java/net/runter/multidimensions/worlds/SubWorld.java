@@ -43,4 +43,16 @@ public class SubWorld {
     public RegistryKey<net.minecraft.world.World> getMainWorldKey() {
         return overworldKey;
     }
+
+    public String getOverworldSaveName() {
+        return name + "_overworld";
+    }
+
+    public String getNetherSaveName() {
+        return name + "_nether";
+    }
+
+    public String getEndSaveName() {
+        return name + "_end";
+    }
 }

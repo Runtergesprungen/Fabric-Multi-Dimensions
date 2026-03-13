@@ -29,7 +29,12 @@ public class MultiDimensionsCommands {
 
                                                 String name = StringArgumentType.getString(context, "name");
 
-                                                SubWorldManager.createWorld(context.getSource().getServer(), name);
+                                                boolean created = SubWorldManager.createWorld(context.getSource().getServer(), name);
+
+                                                if (!created) {
+                                                    context.getSource().sendError(Text.literal("World already exists: " + name));
+                                                    return 0;
+                                                }
 
                                                 context.getSource().sendFeedback(
                                                         () -> Text.literal("Created world: " + name),
@@ -102,38 +107,40 @@ public class MultiDimensionsCommands {
                                     )
                             )
 
-                            .then(CommandManager.literal("tptest")
-                                    .executes(context -> {
-                                        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
-                                        MinecraftServer server = context.getSource().getServer();
+                            .then(CommandManager.literal("info")
+                                    .then(CommandManager.argument("name", StringArgumentType.word())
+                                            .suggests((context, builder) -> {
+                                                for (String worldName : SubWorldManager.getWorlds()) {
+                                                    builder.suggest(worldName);
+                                                }
+                                                return builder.buildFuture();
+                                            })
+                                            .executes(context -> {
 
-                                        ServerWorld targetWorld = server.getWorld(DimensionKeys.testOverworld());
+                                                String name = StringArgumentType.getString(context, "name");
 
-                                        if (targetWorld == null) {
-                                            context.getSource().sendError(Text.literal(
-                                                    "Test dimension is not loaded: " + DimensionKeys.testOverworld().getValue()
-                                            ));
-                                            return 0;
-                                        }
+                                                if (!SubWorldManager.worldExists(name)) {
+                                                    context.getSource().sendError(Text.literal("World does not exist: " + name));
+                                                    return 0;
+                                                }
 
-                                        player.teleport(
-                                                targetWorld,
-                                                0,
-                                                100,
-                                                0,
-                                                Set.of(),
-                                                player.getYaw(),
-                                                player.getPitch(),
-                                                true
-                                        );
+                                                SubWorld world = SubWorldManager.getWorld(name);
 
-                                        context.getSource().sendFeedback(
-                                                () -> Text.literal("Teleported to test dimension."),
-                                                false
-                                        );
+                                                context.getSource().sendFeedback(
+                                                        () -> Text.literal(
+                                                                "Name: " + world.getName()
+                                                                        + " | Type: " + world.getType()
+                                                                        + " | Save names: "
+                                                                        + world.getOverworldSaveName() + ", "
+                                                                        + world.getNetherSaveName() + ", "
+                                                                        + world.getEndSaveName()
+                                                        ),
+                                                        false
+                                                );
 
-                                        return 1;
-                                    })
+                                                return 1;
+                                            })
+                                    )
                             )
             );
 
