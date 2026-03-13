@@ -29,4 +29,11 @@ public class DimensionKeys {
                 Identifier.of(MOD_ID, name + "_end")
         );
     }
+
+    public static RegistryKey<World> testOverworld() {
+        return RegistryKey.of(
+                RegistryKeys.WORLD,
+                Identifier.of(MOD_ID, "test_overworld")
+        );
+    }
 }
