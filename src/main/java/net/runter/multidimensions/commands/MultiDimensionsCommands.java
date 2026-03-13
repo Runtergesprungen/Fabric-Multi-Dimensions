@@ -7,7 +7,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.runter.multidimensions.worlds.SubWorld;
 import net.runter.multidimensions.worlds.SubWorldManager;
 import net.runter.multidimensions.dimensions.DimensionsManager;
-import net.runter.multidimensions.dimensions.DimensionKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -83,10 +82,10 @@ public class MultiDimensionsCommands {
 
                                                 SubWorld subWorld = SubWorldManager.getWorld(name);
 
-                                                ServerWorld targetWorld = DimensionsManager.getWorld(server, subWorld.getMainWorldKey());
+                                                ServerWorld targetWorld = DimensionsManager.getWorld(server, subWorld);
                                                 if (targetWorld == null) {
                                                     context.getSource().sendError(Text.literal(
-                                                            "Target world is not loaded yet: " + subWorld.getMainWorldKey().getValue()
+                                                            DimensionsManager.getLoadStatusMessage(server, subWorld)
                                                     ));
                                                     return 0;
                                                 }
@@ -134,6 +133,8 @@ public class MultiDimensionsCommands {
                                                                         + world.getOverworldSaveName() + ", "
                                                                         + world.getNetherSaveName() + ", "
                                                                         + world.getEndSaveName()
+                                                                        + " | Status: "
+                                                                        + DimensionsManager.getLoadStatusMessage(context.getSource().getServer(), world)
                                                         ),
                                                         false
                                                 );

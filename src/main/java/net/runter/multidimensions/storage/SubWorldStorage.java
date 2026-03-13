@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.WorldSavePath;
 import net.runter.multidimensions.worlds.SubWorld;
 import net.runter.multidimensions.worlds.WorldType;
 
@@ -57,10 +58,42 @@ public class SubWorldStorage {
     }
 
     private static Path getFile(MinecraftServer server) {
-        return server.getRunDirectory()
+        return server.getSavePath(WorldSavePath.ROOT)
                 .resolve("config")
                 .resolve("multidimensions")
                 .resolve("subworlds.json");
+    }
+
+    public static Path getDimensionsRoot(MinecraftServer server) {
+        return server.getSavePath(WorldSavePath.ROOT).resolve("dimensions");
+    }
+
+    public static Path getDimensionPath(MinecraftServer server, String namespace, String path) {
+        return getDimensionsRoot(server)
+                .resolve(namespace)
+                .resolve(path);
+    }
+
+    public static Path getOverworldPath(MinecraftServer server, SubWorld world) {
+        return getDimensionPath(server, "multidimensions", world.getOverworldSaveName());
+    }
+
+    public static Path getNetherPath(MinecraftServer server, SubWorld world) {
+        return getDimensionPath(server, "multidimensions", world.getNetherSaveName());
+    }
+
+    public static Path getEndPath(MinecraftServer server, SubWorld world) {
+        return getDimensionPath(server, "multidimensions", world.getEndSaveName());
+    }
+
+    public static void createWorldFolders(MinecraftServer server, SubWorld world) {
+        try {
+            Files.createDirectories(getOverworldPath(server, world));
+            Files.createDirectories(getNetherPath(server, world));
+            Files.createDirectories(getEndPath(server, world));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create sub world folders for " + world.getName(), e);
+        }
     }
 
     public record StoredSubWorld(String name, String type) {

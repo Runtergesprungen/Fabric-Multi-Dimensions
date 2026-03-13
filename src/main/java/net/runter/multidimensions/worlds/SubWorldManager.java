@@ -15,18 +15,19 @@ public class SubWorldManager {
         if (worldExists(name)) {
             return false;
         }
+
         SubWorld world = new SubWorld(name, WorldType.FULL);
         WORLDS.put(name, world);
 
+        DimensionsManager.prepareSubWorld(server, world);
         SubWorldStorage.save(server, getAllWorldObjects());
-
-        DimensionsManager.getWorld(server, world.getMainWorldKey());
 
         return true;
     }
 
     public static void loadWorlds(MinecraftServer server) {
         WORLDS.clear();
+
         for (SubWorldStorage.StoredSubWorld stored : SubWorldStorage.load(server)) {
             SubWorld world = new SubWorld(
                     stored.name(),
@@ -35,7 +36,7 @@ public class SubWorldManager {
 
             WORLDS.put(world.getName(), world);
 
-            DimensionsManager.getWorld(server, world.getMainWorldKey());
+            DimensionsManager.prepareSubWorld(server, world);
         }
     }
 

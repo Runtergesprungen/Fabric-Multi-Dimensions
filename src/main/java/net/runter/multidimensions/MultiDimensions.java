@@ -5,7 +5,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 import net.runter.multidimensions.commands.MultiDimensionsCommands;
 
+import net.runter.multidimensions.dimensions.DimensionBlueprint;
 import net.runter.multidimensions.worlds.SubWorldManager;
+import net.runter.multidimensions.dimensions.DimensionsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,13 @@ public class MultiDimensions implements ModInitializer {
 
 		MultiDimensionsCommands.register();
 
-		ServerLifecycleEvents.SERVER_STARTED.register(SubWorldManager::loadWorlds);
+		ServerLifecycleEvents.SERVER_STARTING.register(SubWorldManager::loadWorlds);
+
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+			DimensionsManager.debugCreateOverworldBlueprint(server);
+			DimensionsManager.debugCreateNetherBlueprint(server);
+			DimensionsManager.debugCreateEndBlueprint(server);
+		});
 
 	}
 }
