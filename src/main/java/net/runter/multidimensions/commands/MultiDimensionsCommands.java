@@ -4,19 +4,15 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.runter.multidimensions.worlds.WorldManager;
-import net.runter.multidimensions.worlds.World;
+import net.runter.multidimensions.worlds.SubWorld;
+import net.runter.multidimensions.worlds.SubWorldManager;
 import net.runter.multidimensions.dimensions.DimensionsManager;
 import net.runter.multidimensions.dimensions.DimensionKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
+
 import java.util.Set;
-import net.minecraft.server.command.ServerCommandSource;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.suggestion.Suggestions;
-import java.util.concurrent.CompletableFuture;
 
 public class MultiDimensionsCommands {
 
@@ -33,7 +29,7 @@ public class MultiDimensionsCommands {
 
                                                 String name = StringArgumentType.getString(context, "name");
 
-                                                WorldManager.createWorld(context.getSource().getServer(), name);
+                                                SubWorldManager.createWorld(context.getSource().getServer(), name);
 
                                                 context.getSource().sendFeedback(
                                                         () -> Text.literal("Created world: " + name),
@@ -48,7 +44,7 @@ public class MultiDimensionsCommands {
                             .then(CommandManager.literal("list")
                                     .executes(context -> {
 
-                                        String worlds = String.join(",", WorldManager.getWorlds());
+                                        String worlds = String.join(",", SubWorldManager.getWorlds());
 
                                         context.getSource().sendFeedback(
                                                 () -> Text.literal("Worlds: " + worlds),
@@ -63,7 +59,7 @@ public class MultiDimensionsCommands {
                                     .then(CommandManager.argument("name", StringArgumentType.word())
                                             .suggests((context, builder) -> {
 
-                                                for (String world : WorldManager.getWorlds()) {
+                                                for (String world : SubWorldManager.getWorlds()) {
                                                     builder.suggest(world);
                                                 }
 
@@ -72,7 +68,7 @@ public class MultiDimensionsCommands {
                                             .executes(context -> {
                                                 String name = StringArgumentType.getString(context, "name");
 
-                                                if (!WorldManager.worldExists(name)) {
+                                                if (!SubWorldManager.worldExists(name)) {
                                                     context.getSource().sendError(Text.literal("World does not exist: " + name));
                                                     return 0;
                                                 }
@@ -80,12 +76,12 @@ public class MultiDimensionsCommands {
                                                 ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
                                                 MinecraftServer server = context.getSource().getServer();
 
-                                                World world = WorldManager.getWorld(name);
+                                                SubWorld subWorld = SubWorldManager.getWorld(name);
 
-                                                ServerWorld targetWorld = DimensionsManager.getWorld(server, world.getMainWorldKey());
+                                                ServerWorld targetWorld = DimensionsManager.getWorld(server, subWorld.getMainWorldKey());
                                                 if (targetWorld == null) {
                                                     context.getSource().sendError(Text.literal(
-                                                            "Target world is not loaded yet: " + world.getMainWorldKey().getValue()
+                                                            "Target world is not loaded yet: " + subWorld.getMainWorldKey().getValue()
                                                     ));
                                                     return 0;
                                                 }
@@ -94,9 +90,9 @@ public class MultiDimensionsCommands {
 
                                                 context.getSource().sendFeedback(
                                                         () -> Text.literal(
-                                                                "Overworld: " + world.getOverworldKey().getValue()
-                                                                        + " | Nether: " + world.getNetherKey().getValue()
-                                                                        + " | End: " + world.getEndKey().getValue()
+                                                                "Overworld: " + subWorld.getOverworldKey().getValue()
+                                                                        + " | Nether: " + subWorld.getNetherKey().getValue()
+                                                                        + " | End: " + subWorld.getEndKey().getValue()
                                                         ),
                                                         false
                                                 );

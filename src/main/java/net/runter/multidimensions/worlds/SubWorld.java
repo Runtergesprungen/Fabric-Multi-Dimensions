@@ -3,7 +3,7 @@ package net.runter.multidimensions.worlds;
 import net.minecraft.registry.RegistryKey;
 import net.runter.multidimensions.dimensions.DimensionKeys;
 
-public class World {
+public class SubWorld {
 
     private final  String name;
     private final WorldType type;
@@ -11,7 +11,7 @@ public class World {
     private final RegistryKey<net.minecraft.world.World> netherKey;
     private final RegistryKey<net.minecraft.world.World> endKey;
 
-    public World(String name, WorldType type) {
+    public SubWorld(String name, WorldType type) {
         this.name = name;
         this.type = type;
 
