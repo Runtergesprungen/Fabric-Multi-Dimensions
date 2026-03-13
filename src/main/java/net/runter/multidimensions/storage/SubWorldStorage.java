@@ -25,6 +25,7 @@ public class SubWorldStorage {
         Path file = getFile(server);
 
         List<StoredSubWorld> storedWorlds = new ArrayList<>();
+
         for (SubWorld world : worlds) {
             storedWorlds.add(new StoredSubWorld(world.getName(), world.getType().name()));
         }
@@ -56,7 +57,7 @@ public class SubWorldStorage {
     }
 
     private static Path getFile(MinecraftServer server) {
-        return server.getRunDirectory().toPath()
+        return server.getRunDirectory()
                 .resolve("config")
                 .resolve("multidimensions")
                 .resolve("subworlds.json");

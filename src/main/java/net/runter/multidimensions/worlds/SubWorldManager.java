@@ -12,8 +12,8 @@ public class SubWorldManager {
     private static final Map<String, SubWorld> WORLDS = new HashMap<>();
 
     public static void createWorld(MinecraftServer server, String name) {
-        SubWorld subWorld = new SubWorld(name, WorldType.FULL);
-        WORLDS.put(name, subWorld);
+        SubWorld world = new SubWorld(name, WorldType.FULL);
+        WORLDS.put(name, world);
 
         SubWorldStorage.save(server, getAllWorldObjects());
 
