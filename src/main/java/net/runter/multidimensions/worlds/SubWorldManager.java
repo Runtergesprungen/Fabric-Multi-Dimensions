@@ -21,6 +21,19 @@ public class SubWorldManager {
 
     }
 
+    public static void loadWorlds(MinecraftServer server) {
+        for (SubWorldStorage.StoredSubWorld stored : SubWorldStorage.load(server)) {
+            SubWorld world = new SubWorld(
+                    stored.name(),
+                    stored.getWorldType()
+            );
+
+            WORLDS.put(world.getName(), world);
+
+            DimensionsManager.getWorld(server, world.getMainWorldKey());
+        }
+    }
+
     public static boolean worldExists(String name) {
         return WORLDS.containsKey(name);
 
