@@ -3,12 +3,24 @@
 	"package": "net.runter.multidimensions.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"MinecraftServerCreateWorldsMixin",
+		"MinecraftServerMixin",
+		"EndPortalBlockMixin",
+		"NetherPortalBlockMixin",
+		"AbstractFireBlockMixin",
+		"ServerWorldEndFightMixin",
+		"ServerWorldDragonFightSaveMixin",
+		"MinecraftServerAccessor",
+		"EnderDragonFightInvoker",
+		"ServerPlayerRespawnInvoker",
+		"TimeCommandMixin",
+		"MinecraftServerWorldPropertiesMixin",
+		"MinecraftServerWorldTickTimeMixin",
+		"WeatherCommandMixin",
+		"DifficultyCommandMixin",
+		"GameRuleCommandMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
 	}
 }

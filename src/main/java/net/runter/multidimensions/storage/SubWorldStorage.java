@@ -15,51 +15,17 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class SubWorldStorage {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Type LIST_TYPE = new TypeToken<List<StoredSubWorld>>() {}.getType();
 
-    public static void save(MinecraftServer server, Iterable<SubWorld> worlds) {
-        Path file = getFile(server);
-
-        List<StoredSubWorld> storedWorlds = new ArrayList<>();
-
-        for (SubWorld world : worlds) {
-            storedWorlds.add(new StoredSubWorld(world.getName(), world.getType().name()));
-        }
-
-        try {
-            Files.createDirectories(file.getParent());
-
-            try (Writer writer = Files.newBufferedWriter(file)) {
-                GSON.toJson(storedWorlds, LIST_TYPE, writer);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save sub worlds", e);
-        }
-    }
-
-    public static List<StoredSubWorld> load(MinecraftServer server) {
-        Path file = getFile(server);
-
-        if (!Files.exists(file)) {
-            return new ArrayList<>();
-        }
-
-        try (Reader reader = Files.newBufferedReader(file)) {
-            List<StoredSubWorld> worlds = GSON.fromJson(reader, LIST_TYPE);
-            return worlds != null ? worlds : new ArrayList<>();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load sub worlds", e);
-        }
-    }
-
     private static Path getFile(MinecraftServer server) {
         return server.getSavePath(WorldSavePath.ROOT)
-                .resolve("config")
                 .resolve("multidimensions")
                 .resolve("subworlds.json");
     }
@@ -91,14 +57,81 @@ public class SubWorldStorage {
             Files.createDirectories(getOverworldPath(server, world));
             Files.createDirectories(getNetherPath(server, world));
             Files.createDirectories(getEndPath(server, world));
+            Files.createDirectories(getSubWorldMetaRoot(server, world));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create sub world folders for " + world.getName(), e);
+            throw new RuntimeException("Failed to create subworld folders for " + world.getName(), e);
         }
     }
 
-    public record StoredSubWorld(String name, String type) {
-        public WorldType getWorldType() {
-            return WorldType.valueOf(type);
+    public static void deleteWorldFolders(MinecraftServer server, SubWorld world) {
+        deleteIfExists(getOverworldPath(server, world));
+        deleteIfExists(getNetherPath(server, world));
+        deleteIfExists(getEndPath(server, world));
+        deleteIfExists(getSubWorldMetaRoot(server, world));
+    }
+
+    private static void deleteIfExists(Path path) {
+        if (!Files.exists(path)) {
+            return;
         }
+
+        try (Stream<Path> stream = Files.walk(path)) {
+            stream.sorted(Comparator.reverseOrder())
+                    .forEach(current -> {
+                        try {
+                            Files.deleteIfExists(current);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to delete path: " + current, e);
+                        }
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete path tree: " + path, e);
+        }
+    }
+
+    public static void save(MinecraftServer server, Iterable<SubWorld> worlds) {
+        Path file = getFile(server);
+        List<StoredSubWorld> stored = new ArrayList<>();
+
+        for (SubWorld world : worlds) {
+            stored.add(new StoredSubWorld(world.getName(), world.getType()));
+        }
+
+        try {
+            Files.createDirectories(file.getParent());
+
+            try (Writer writer = Files.newBufferedWriter(file)) {
+                GSON.toJson(stored, LIST_TYPE, writer);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save subworld list", e);
+        }
+    }
+
+    public static List<StoredSubWorld> load(MinecraftServer server) {
+        Path file = getFile(server);
+
+        if (!Files.exists(file)) {
+            return List.of();
+        }
+
+        try (Reader reader = Files.newBufferedReader(file)) {
+            List<StoredSubWorld> stored = GSON.fromJson(reader, LIST_TYPE);
+            return stored != null ? stored : List.of();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load subworld list", e);
+        }
+    }
+
+    public record StoredSubWorld(String name, WorldType worldType) {
+        public WorldType getWorldType() {
+            return worldType;
+        }
+    }
+
+    public static Path getSubWorldMetaRoot(MinecraftServer server, SubWorld world) {
+        return server.getSavePath(WorldSavePath.ROOT)
+                .resolve("multidimensions")
+                .resolve(world.getName());
     }
 }
